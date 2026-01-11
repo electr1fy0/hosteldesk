@@ -4,10 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5"
 )
 
 var secret = []byte("supersecretkey")
@@ -69,7 +72,6 @@ func CORSMiddleware(next http.HandlerFunc) http.HandlerFunc {
 }
 
 func signupHandler(w http.ResponseWriter, r *http.Request) {
-
 	var user User
 	err := json.NewDecoder(r.Body).Decode(&user)
 
@@ -78,15 +80,25 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid body", http.StatusBadRequest)
 		return
 	}
-	fmt.Println(user)
-
-	users[user.ID] = user
 
 	claims := jwt.MapClaims{
 		"id":   user.ID,
 		"name": user.Name,
 	}
+	if err != nil {
+		log.Println(err)
+	}
+	conn, err := pgx.Connect(context.Background(), os.Getenv("POSTGRES_CONN_STR"))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	_, err = conn.Exec(context.Background(), `insert into users (id, name) values ($1, $2)`, user.ID, user.Name)
 
+	if err != nil {
+		log.Println(err)
+		return
+	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	tokenStr, _ := token.SignedString(secret)
