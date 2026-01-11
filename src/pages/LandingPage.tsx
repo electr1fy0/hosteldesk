@@ -6,11 +6,9 @@ import {
   IconFingerprint,
   IconDeviceMobile,
   IconSearch,
-  IconCommand,
   IconCircleCheck,
   IconAlertCircle,
   IconDots,
-  IconFilter,
   IconPlus,
   IconLayoutDashboard,
   IconChartBar,
@@ -43,10 +41,10 @@ const HostelDesk = () => {
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-zinc-900 selection:bg-zinc-900 selection:text-white font-sans antialiased">
-          {/* The "Linear" Background Layering */}
-                <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
-                <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0)_50%)] pointer-events-none" />    
-          {/* Navigation */}
+      {/* The "Linear" Background Layering */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
+      <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0)_50%)] pointer-events-none" />
+      {/* Navigation */}
       <header className="sticky top-0 z-50 w-full border-b border-zinc-200/30 bg-white/80 backdrop-blur-lg">
         <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-3 font-bold tracking-tight">
@@ -79,7 +77,7 @@ const HostelDesk = () => {
               size="sm"
               className="rounded-lg text-sm font-medium hover:text-zinc-900"
             >
-              Login
+              Sign in
             </Button>
             <Button
               size="sm"
@@ -627,7 +625,5 @@ const ProcessCard = ({
       <p className="text-sm text-zinc-500 leading-relaxed">{description}</p>
     </div>
   );
-
-
 
 export default HostelDesk;
