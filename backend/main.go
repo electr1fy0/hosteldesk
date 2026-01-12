@@ -21,18 +21,47 @@ type User struct {
 }
 
 func signinHandler(w http.ResponseWriter, r *http.Request) {
-	err := json.NewEncoder(w).Encode(r.Context().Value("claims"))
+	var user User
+	err := json.NewDecoder(r.Body).Decode(&user)
+
 	if err != nil {
-		w.Write([]byte("failed"))
+		w.Write([]byte("failed to decode user data"))
+		return
 	}
+	fmt.Println(user)
+	claims := jwt.MapClaims{
+		"id":   user.ID,
+		"name": user.Name,
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenStr, err := token.SignedString(secret)
+	if err != nil {
+		http.Error(w, "failed to sign token", http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_jwt",
+		Value:    tokenStr,
+		Expires:  time.Now().Add(48 * time.Hour),
+		Path:     "/",
+		Secure:   false,
+		SameSite: http.SameSiteNoneMode,
+	})
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"event": "cookie set",
+	})
 }
 
 var users = make(map[string]User)
 
 func authMiddeware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		cookie, _ := r.Cookie("auth_jwt")
+		cookie, err := r.Cookie("auth_jwt")
+		if err != nil {
+			http.Error(w, "no cookie", http.StatusUnauthorized)
+			return
+		}
 		jwtStr := cookie.Value
 
 		token, _ := jwt.Parse(jwtStr, func(t *jwt.Token) (any, error) {
@@ -54,10 +83,14 @@ func authMiddeware(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+func protectedHandler(w http.ResponseWriter, r *http.Request) {
+	claims := r.Context().Value("claims")
+	json.NewEncoder(w).Encode(claims)
+
+}
+
 func CORSMiddleware(next http.HandlerFunc) http.HandlerFunc {
-
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -81,13 +114,6 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	claims := jwt.MapClaims{
-		"id":   user.ID,
-		"name": user.Name,
-	}
-	if err != nil {
-		log.Println(err)
-	}
 	conn, err := pgx.Connect(context.Background(), os.Getenv("POSTGRES_CONN_STR"))
 	if err != nil {
 		log.Println(err)
@@ -99,20 +125,7 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenStr, _ := token.SignedString(secret)
-
-	cookie := http.Cookie{
-		Name:     "auth_jwt",
-		Value:    tokenStr,
-		Expires:  time.Now().Add(1 * time.Hour),
-		Path:     "/",
-		SameSite: http.SameSiteNoneMode,
-		Secure:   false,
-	}
-
-	http.SetCookie(w, &cookie)
 	json.NewEncoder(w).Encode(map[string]string{
 		"resp": "nice work",
 	})
@@ -120,8 +133,8 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/signup", CORSMiddleware(signupHandler))
-	http.HandleFunc("/login", CORSMiddleware(authMiddeware(signinHandler)))
-
+	http.HandleFunc("/login", CORSMiddleware(signinHandler))
+	http.HandleFunc("/protected", CORSMiddleware(authMiddeware(protectedHandler)))
 	http.ListenAndServe(":8080", nil)
 
 }
