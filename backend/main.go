@@ -23,12 +23,23 @@ type User struct {
 func signinHandler(w http.ResponseWriter, r *http.Request) {
 	var user User
 	err := json.NewDecoder(r.Body).Decode(&user)
-
 	if err != nil {
 		w.Write([]byte("failed to decode user data"))
 		return
 	}
-	fmt.Println(user)
+
+	conn, err := pgx.Connect(context.Background(), os.Getenv("POSTGRES_CONN_STR"))
+
+	var dbUser User
+	err = conn.QueryRow(context.Background(), "select id, name from users where id = $1", user.ID).Scan(&dbUser.ID, &dbUser.Name)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			http.Error(w, "invalid credentials", http.StatusUnauthorized)
+			return
+		}
+	}
+
+	fmt.Println(dbUser)
 	claims := jwt.MapClaims{
 		"id":   user.ID,
 		"name": user.Name,
@@ -80,6 +91,7 @@ func authMiddeware(next http.HandlerFunc) http.HandlerFunc {
 		}
 		ctx := context.WithValue(r.Context(), "claims", claims)
 		next.ServeHTTP(w, r.WithContext(ctx))
+
 	}
 }
 
@@ -131,9 +143,18 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func signoutHandler(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{Name: "auth_jwt", Value: "", Path: "/", MaxAge: -1, Secure: false, SameSite: http.SameSiteNoneMode})
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"removed": "cookie",
+	})
+}
+
 func main() {
 	http.HandleFunc("/signup", CORSMiddleware(signupHandler))
 	http.HandleFunc("/login", CORSMiddleware(signinHandler))
+	http.HandleFunc("/signout", CORSMiddleware(signoutHandler))
 	http.HandleFunc("/protected", CORSMiddleware(authMiddeware(protectedHandler)))
 	http.ListenAndServe(":8080", nil)
 
