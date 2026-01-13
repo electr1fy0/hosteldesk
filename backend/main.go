@@ -205,7 +205,7 @@ func listIssuesHandler(w http.ResponseWriter, r *http.Request) {
 		rows.Scan(&issue.ID, &issue.Title, &issue.Room, &issue.Category, &issue.Priority)
 		issues = append(issues, issue)
 	}
-
+	fmt.Println(issues)
 	json.NewEncoder(w).Encode(issues)
 }
 func main() {

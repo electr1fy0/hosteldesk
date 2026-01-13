@@ -16,8 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import data from "../data.json";
+
 import { CheckCircle, CircleAlert, CircleDashed } from "lucide-react";
 import { IconCirclePlusFilled } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -67,7 +67,9 @@ export default function Home({ onLogout }: { onLogout: () => void }) {
         // headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
-      setIssues(await resp.json());
+      const data = await resp.json();
+      setIssues(data);
+      console.log(data);
     }
     getIssues();
   }, []);
@@ -81,6 +83,19 @@ export default function Home({ onLogout }: { onLogout: () => void }) {
     });
 
     console.log(await resp.json());
+
+    async function getIssues() {
+      const resp = await fetch("http://localhost:8080/issues", {
+        method: "GET",
+        // body: JSON.stringify(issue),
+        // headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      const data = await resp.json();
+      setIssues(data);
+      console.log(data);
+    }
+    getIssues();
   };
   return (
     <SidebarProvider
@@ -244,7 +259,7 @@ export default function Home({ onLogout }: { onLogout: () => void }) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {issues.length > 1 &&
+                  {issues.length > 0 &&
                     issues[0].id &&
                     issues.map((issue) => (
                       <TableRow key={issue.id}>
