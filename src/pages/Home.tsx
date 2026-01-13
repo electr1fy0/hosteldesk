@@ -16,12 +16,72 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import data from "../data.json";
 import { CheckCircle, CircleAlert, CircleDashed } from "lucide-react";
 import { IconCirclePlusFilled } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+interface Issue {
+  id?: string;
+  title: string;
+  room: string;
+  category: string;
+  priority: string;
+  status?: string;
+  assignee?: string;
+}
 
-export default function Home() {
+export default function Home({ onLogout }: { onLogout: () => void }) {
+  const [issue, setIssue] = useState<Issue>({
+    title: "broken ac",
+    room: "T918",
+    category: "Electricity",
+    priority: "Medium",
+  });
+  const [issues, setIssues] = useState<Issue[]>([]);
+
+  const updateIssue = (fields: Partial<Issue>) => {
+    setIssue((prev) => {
+      return { ...prev, ...fields };
+    });
+  };
+
+  useEffect(() => {
+    async function getIssues() {
+      const resp = await fetch("http://localhost:8080/issues", {
+        method: "GET",
+        // body: JSON.stringify(issue),
+        // headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      setIssues(await resp.json());
+    }
+    getIssues();
+  }, []);
+
+  const submitComplaint = async () => {
+    const resp = await fetch("http://localhost:8080/issues/create", {
+      method: "POST",
+      body: JSON.stringify(issue),
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+
+    console.log(await resp.json());
+  };
   return (
     <SidebarProvider
       style={
@@ -33,7 +93,7 @@ export default function Home() {
     >
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader onLogout={onLogout} />
         <div className="flex flex-1 flex-col ">
           <div className="@container/main flex flex-1 flex-col gap-2 w-full p-4">
             <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full my-4">
@@ -87,14 +147,89 @@ export default function Home() {
               </Card>
             </div>
             <div>
-              {" "}
               {/* This div wraps the header/button and the table */}
               <div className="flex justify-between items-center py-4">
                 <h2 className="text-2xl font-bold">Issues</h2>
-                <Button>
+                <Dialog>
+                  <form>
+                    <DialogTrigger asChild>
+                      <Button variant="default">
+                        {" "}
+                        <IconCirclePlusFilled />
+                        New Complaint
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Create Issue</DialogTitle>
+                        <DialogDescription>
+                          Fill all details of your issue to get it resolved
+                          quickly.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4">
+                        <div className="grid gap-3">
+                          <Label htmlFor="title">Title</Label>
+                          <Input
+                            id="issue-title"
+                            name="title"
+                            placeholder="Broken AC"
+                            onChange={(e) =>
+                              updateIssue({ title: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div className="grid gap-3">
+                          <Label htmlFor="room-info">Room</Label>
+                          <Input
+                            id="room-info"
+                            name="room"
+                            placeholder="T123"
+                            onChange={(e) => {
+                              updateIssue({ room: e.target.value });
+                            }}
+                          />
+                        </div>{" "}
+                        <div className="grid gap-3">
+                          <Label htmlFor="category">Category</Label>
+                          <Input
+                            id="category"
+                            name="category"
+                            placeholder="Electricity"
+                            onChange={(e) => {
+                              updateIssue({ category: e.target.value });
+                            }}
+                          />
+                        </div>
+                        <div className="grid gap-3">
+                          <Label htmlFor="priority">Priority</Label>
+                          <Input
+                            id="username-1"
+                            name="priority"
+                            placeholder="Medium"
+                            onChange={(e) => {
+                              updateIssue({ priority: e.target.value });
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <DialogClose asChild>
+                          <Button variant="outline">Cancel</Button>
+                        </DialogClose>
+                        <DialogClose asChild>
+                          <Button onClick={submitComplaint} type="submit">
+                            Submit
+                          </Button>
+                        </DialogClose>
+                      </DialogFooter>
+                    </DialogContent>
+                  </form>
+                </Dialog>
+                {/*<Button onClick={submitComplaint}>
                   <IconCirclePlusFilled />
                   New Complaint
-                </Button>
+                </Button>*/}
               </div>
               <Table>
                 <TableHeader>
@@ -103,23 +238,27 @@ export default function Home() {
                     <TableHead>Title</TableHead>
                     <TableHead>Room</TableHead>
                     <TableHead>Category</TableHead>
-                    <TableHead>Status</TableHead>
                     <TableHead>Priority</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Assignee</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data.map((issue) => (
-                    <TableRow key={issue.id}>
-                      <TableCell className="font-medium">{issue.id}</TableCell>
-                      <TableCell>{issue.title}</TableCell>
-                      <TableCell>{issue.room}</TableCell>
-                      <TableCell>{issue.category}</TableCell>
-                      <TableCell>{issue.status}</TableCell>
-                      <TableCell>{issue.priority}</TableCell>
-                      <TableCell>{issue.assignee}</TableCell>
-                    </TableRow>
-                  ))}
+                  {issues.length > 1 &&
+                    issues[0].id &&
+                    issues.map((issue) => (
+                      <TableRow key={issue.id}>
+                        <TableCell className="font-medium">
+                          {issue.title}
+                        </TableCell>
+                        <TableCell>{issue.title}</TableCell>
+                        <TableCell>{issue.room}</TableCell>
+                        <TableCell>{issue.category}</TableCell>
+                        <TableCell>{issue.priority}</TableCell>
+                        {/*<TableCell>{issue.status}</TableCell>*/}
+                        {/*<TableCell>{issue.assignee}</TableCell>*/}
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </div>

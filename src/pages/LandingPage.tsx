@@ -5,22 +5,35 @@ import {
   IconBolt,
   IconFingerprint,
   IconDeviceMobile,
-  IconSearch,
-  IconCircleCheck,
-  IconAlertCircle,
-  IconDots,
-  IconPlus,
   IconLayoutDashboard,
   IconChartBar,
   IconShieldCheck,
   IconActivity,
   IconClock,
+  IconPlus,
+  IconCircleCheck,
+  IconCirclePlusFilled,
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AnimateOnScroll from "@/components/ui/animate-on-scroll";
-import { motion } from "motion/react";
+import { Link } from "react-router";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import data from "../data.json";
+import { CheckCircle, CircleDashed, CircleAlert } from "lucide-react";
 
 const HostelDesk = () => {
   const handleScroll = (
@@ -31,7 +44,7 @@ const HostelDesk = () => {
     const targetId = href.substring(1);
     const targetElement = document.getElementById(targetId);
     if (targetElement) {
-      const top = targetElement.offsetTop - 80; // Adjusted for sticky header
+      const top = targetElement.offsetTop - 80;
       window.scrollTo({
         top: top,
         behavior: "smooth",
@@ -40,8 +53,8 @@ const HostelDesk = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-zinc-900 selection:bg-zinc-900 selection:text-white font-sans antialiased">
-      {/* The "Linear" Background Layering */}
+    <div className="w-full min-h-screen bg-[#fafafa] text-zinc-900 selection:bg-zinc-900 selection:text-white font-sans antialiased">
+      {/* The Layering */}
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:16px_16px] pointer-events-none" />
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0)_50%)] pointer-events-none" />
       {/* Navigation */}
@@ -76,14 +89,16 @@ const HostelDesk = () => {
               variant="ghost"
               size="sm"
               className="rounded-lg text-sm font-medium hover:text-zinc-900"
+              asChild
             >
-              Sign in
+              <Link to="/auth">Sign In</Link>
             </Button>
             <Button
               size="sm"
               className="rounded-full px-5 bg-zinc-900 hover:bg-zinc-800 text-sm font-bold shadow-lg shadow-zinc-300/70 transition-all hover:shadow-xl"
+              asChild
             >
-              Sign Up
+              <Link to="/auth">Sign Up</Link>
             </Button>
           </div>
         </div>
@@ -124,139 +139,99 @@ const HostelDesk = () => {
           </AnimateOnScroll>
         </div>
 
-        {/* Product Preview - Complex UI Display */}
+        {/* Product Preview */}
         <AnimateOnScroll>
           <div id="product" className="group relative my-48">
             <div className="absolute -inset-1 bg-gradient-to-r from-zinc-200 to-zinc-100 rounded-[2.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000" />
             <div className="relative overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-2xl">
-              {/* Window Controls */}
-              <div className="border-b border-zinc-100 bg-zinc-50/50 px-6 py-4 flex items-center justify-between">
-                <div className="flex gap-2">
-                  <div className="h-3 w-3 rounded-full bg-zinc-200" />
-                  <div className="h-3 w-3 rounded-full bg-zinc-200" />
-                  <div className="h-3 w-3 rounded-full bg-zinc-200" />
-                </div>
-                <div className="flex items-center gap-4">
-                  <Tabs defaultValue="active" className="w-[240px]">
-                    <TabsList className="h-8 bg-zinc-200/50">
-                      <TabsTrigger
-                        value="active"
-                        className="text-[10px] uppercase font-bold tracking-widest"
-                      >
-                        Active Issues
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="resolved"
-                        className="text-[10px] uppercase font-bold tracking-widest"
-                      >
-                        Resolved
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
-                </div>
-                <div className="flex items-center gap-3">
-                  <IconSearch size={16} className="text-zinc-400" />
-                  <IconDots size={16} className="text-zinc-400" />
-                </div>
-              </div>
-
-              {/* Content Area */}
-              <div className="flex h-[600px]">
-                {/* Sidebar */}
-                <div className="w-64 border-r border-zinc-100 p-6 hidden lg:block">
-                  <div className="space-y-6">
-                    <div>
-                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 block">
-                        Filters
-                      </label>
-                      <div className="space-y-2">
-                        <SidebarItem
-                          icon={<IconAlertCircle size={16} />}
-                          label="Critical"
-                          count="4"
-                          active
-                        />
-                        <SidebarItem
-                          icon={<IconClock size={16} />}
-                          label="Pending"
-                          count="12"
-                        />
-                        <SidebarItem
-                          icon={<IconCircleCheck size={16} />}
-                          label="Completed"
-                          count="148"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-4 block">
-                        Teams
-                      </label>
-                      <div className="space-y-2 text-sm font-medium text-zinc-600">
-                        <div className="flex items-center gap-2 p-2 rounded-md hover:bg-zinc-50 cursor-pointer">
-                          <div className="h-2 w-2 rounded-full bg-orange-400" />{" "}
-                          Electrical
+              <div className="flex flex-1 flex-col ">
+                <div className="@container/main flex flex-1 flex-col gap-2 w-full p-4">
+                  <div className="flex flex-col md:flex-row gap-3 md:gap-4 w-full my-4">
+                    <Card className="flex-1 border-green-200 bg-linear-180 from-green-100 to-green-200 py-3 md:py-6 gap-2 md:gap-6">
+                      <CardHeader className="flex flex-row items-center justify-between px-4 md:px-6">
+                        <div className="flex flex-col">
+                          <CardTitle className="text-sm md:text-base">
+                            Resolved
+                          </CardTitle>
+                          <CardDescription className="text-xs md:text-sm">
+                            Solved complaints
+                          </CardDescription>
                         </div>
-                        <div className="flex items-center gap-2 p-2 rounded-md hover:bg-zinc-50 cursor-pointer">
-                          <div className="h-2 w-2 rounded-full bg-blue-400" />{" "}
-                          Plumbing
+                        <CheckCircle className="w-6 h-6 md:w-8 md:h-8 text-green-700" />
+                      </CardHeader>
+                      <CardFooter className="px-4 md:px-6">
+                        <p className="text-2xl md:text-4xl">4</p>
+                      </CardFooter>
+                    </Card>
+                    <Card className="flex-1 bg-linear-180 from-orange-100 to-orange-200 border-orange-200 py-3 md:py-6 gap-2 md:gap-6">
+                      <CardHeader className="flex flex-row items-center justify-between px-4 md:px-6">
+                        <div className="flex flex-col">
+                          <CardTitle className="text-sm md:text-base">
+                            Pending
+                          </CardTitle>
+                          <CardDescription className="text-xs md:text-sm">
+                            Pending complaints
+                          </CardDescription>
                         </div>
-                      </div>
-                    </div>
+                        <CircleDashed className="w-6 h-6 md:w-8 md:h-8 text-orange-700" />
+                      </CardHeader>
+                      <CardFooter className="px-4 md:px-6">
+                        <p className="text-2xl md:text-4xl">4</p>
+                      </CardFooter>
+                    </Card>
+                    <Card className="flex-1 bg-linear-180 from-red-100 to-red-200 border-red-200 py-3 md:py-6 gap-2 md:gap-6">
+                      <CardHeader className="flex flex-row items-center justify-between px-4 md:px-6">
+                        <div className="flex flex-col">
+                          <CardTitle className="text-sm md:text-base">
+                            Unresolved
+                          </CardTitle>
+                          <CardDescription className="text-xs md:text-sm">
+                            Ignored complaints
+                          </CardDescription>
+                        </div>
+                        <CircleAlert className="w-6 h-6 md:w-8 md:h-8 text-red-700" />
+                      </CardHeader>
+                      <CardFooter className="px-4 md:px-6">
+                        <p className="text-2xl md:text-4xl">4</p>
+                      </CardFooter>
+                    </Card>
                   </div>
-                </div>
-
-                {/* Ticket Grid */}
-                <div className="flex-1 overflow-y-auto p-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <TicketCard
-                      id="T-4092"
-                      title="Elevator B Failure"
-                      block="Block Q"
-                      severity="High"
-                      time="12m"
-                      status="escalated"
-                    />
-                    <TicketCard
-                      id="T-4091"
-                      title="Water Leakage R-402"
-                      block="Block L"
-                      severity="Medium"
-                      time="45m"
-                      status="pending"
-                    />
-                    <TicketCard
-                      id="T-4088"
-                      title="Wi-Fi AP Offline"
-                      block="Block N"
-                      severity="High"
-                      time="1h"
-                      status="in-progress"
-                    />
-                    <TicketCard
-                      id="T-4085"
-                      title="AC Gas Refill"
-                      block="Block Q"
-                      severity="Low"
-                      time="3h"
-                      status="pending"
-                    />
-                    <TicketCard
-                      id="T-4082"
-                      title="Switchboard Spark"
-                      block="Block M"
-                      severity="High"
-                      time="5h"
-                      status="escalated"
-                    />
-                    <TicketCard
-                      id="T-4080"
-                      title="Geyser Repair"
-                      block="Block L"
-                      severity="Medium"
-                      time="6h"
-                      status="in-progress"
-                    />
+                  <div>
+                    <div className="flex justify-between items-center py-4">
+                      <h2 className="text-2xl font-bold">Issues</h2>
+                      <Button>
+                        <IconCirclePlusFilled />
+                        New Complaint
+                      </Button>
+                    </div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="w-[100px]">ID</TableHead>
+                          <TableHead>Title</TableHead>
+                          <TableHead>Room</TableHead>
+                          <TableHead>Category</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Priority</TableHead>
+                          <TableHead>Assignee</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {data.map((issue) => (
+                          <TableRow key={issue.id}>
+                            <TableCell className="font-medium">
+                              {issue.id}
+                            </TableCell>
+                            <TableCell>{issue.title}</TableCell>
+                            <TableCell>{issue.room}</TableCell>
+                            <TableCell>{issue.category}</TableCell>
+                            <TableCell>{issue.status}</TableCell>
+                            <TableCell>{issue.priority}</TableCell>
+                            <TableCell>{issue.assignee}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 </div>
               </div>
@@ -378,7 +353,6 @@ const HostelDesk = () => {
           </div>
         </section>
 
-        {/* The System Stats - Data Heavy */}
         <section
           id="performance"
           className="my-48 rounded-[2.5rem] border border-zinc-200 bg-white p-12 overflow-hidden relative"
@@ -501,50 +475,6 @@ const HostelDesk = () => {
   );
 };
 
-/* --- Subcomponents for Precision --- */
-
-const SidebarItem = ({ icon, label, count, active = false }: any) => (
-  <div
-    className={`flex items-center justify-between p-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${active ? "bg-zinc-100 text-zinc-900" : "text-zinc-500 hover:bg-zinc-50/70"}`}
-  >
-    <div className="flex items-center gap-3">
-      {icon}
-      {label}
-    </div>
-    <span
-      className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${active ? "bg-zinc-200/70" : "bg-zinc-100"}`}
-    >
-      {count}
-    </span>
-  </div>
-);
-
-const TicketCard = ({ id, title, block, severity, time, status }: any) => (
-  <div className="p-5 rounded-2xl border border-zinc-100 bg-zinc-50/50 hover:bg-zinc-100/70 hover:border-zinc-200 hover:shadow-lg hover:shadow-zinc-100 transition-all group">
-    <div className="flex items-center justify-between mb-4">
-      <span className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-widest">
-        {id}
-      </span>
-      <Badge
-        variant="outline"
-        className={`text-[10px] font-bold bg-white uppercase ${status === "escalated" ? "text-red-500 border-red-100" : "text-zinc-500"}`}
-      >
-        {status}
-      </Badge>
-    </div>
-    <h4 className="text-sm font-bold text-zinc-900 mb-1 group-hover:text-blue-600 transition-colors">
-      {title}
-    </h4>
-    <div className="flex items-center gap-3 text-[10px] font-bold text-zinc-400 uppercase tracking-tight">
-      <span>{block}</span>
-      <span className="h-1 w-1 rounded-full bg-zinc-300" />
-      <span>{severity}</span>
-      <span className="h-1 w-1 rounded-full bg-zinc-300" />
-      <span>{time} ago</span>
-    </div>
-  </div>
-);
-
 const FeatureCard = ({ icon, title, desc, bg }: any) => (
   <div
     className={`${bg} p-8 rounded-[2rem] border transition-all group flex flex-col h-full relative z-10`}
@@ -565,7 +495,13 @@ const StatBox = ({ label, value, trend }: any) => (
     <div className="flex items-baseline gap-2">
       <span className="text-3xl font-bold tracking-tighter">{value}</span>
       <span
-        className={`text-[10px] font-bold ${trend.includes("+") ? "text-green-500" : trend === "Stable" ? "text-blue-500" : "text-zinc-400"}`}
+        className={`text-[10px] font-bold ${
+          trend.includes("+")
+            ? "text-green-500"
+            : trend === "Stable"
+              ? "text-blue-500"
+              : "text-zinc-400"
+        }`}
       >
         {trend}
       </span>
@@ -579,7 +515,7 @@ const FooterColumn = ({ title, links }: any) => (
       {title}
     </h4>
     <ul className="space-y-3">
-      {links.map((link) => (
+      {links.map((link: any) => (
         <li key={link}>
           <a
             href="#"

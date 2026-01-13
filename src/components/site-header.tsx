@@ -2,7 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-export function SiteHeader() {
+export function SiteHeader({ onLogout }: { onLogout: () => void }) {
+  async function handleLogout(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    const resp = await fetch("http://localhost:8080/signout", {
+      credentials: "include",
+    });
+    console.log(await resp.json());
+    onLogout();
+  }
+
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -13,13 +22,13 @@ export function SiteHeader() {
         />
         <h1 className="text-base font-medium">Dashboard</h1>
         <div className="ml-auto flex items-center gap-2">
-          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-            <a
-              href="#"
-              className="dark:text-foreground"
-            >
-              Sign out
-            </a>
+          <Button
+            variant="ghost"
+            size="sm"
+            className=" sm:flex"
+            onClick={handleLogout}
+          >
+            Sign out
           </Button>
         </div>
       </div>

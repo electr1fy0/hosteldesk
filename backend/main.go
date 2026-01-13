@@ -21,6 +21,14 @@ type User struct {
 	Password string `json:"password"`
 }
 
+type Issue struct {
+	ID       string `json:"id"`
+	Title    string `json:"title"`
+	Room     string `json:"room"`
+	Category string `json:"category"`
+	Priority string `json:"priority"`
+}
+
 func signinHandler(w http.ResponseWriter, r *http.Request) {
 	var user User
 	err := json.NewDecoder(r.Body).Decode(&user)
@@ -168,11 +176,45 @@ func signoutHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func createIssueHandler(w http.ResponseWriter, r *http.Request) {
+	var issue Issue
+	json.NewDecoder(r.Body).Decode(&issue)
+	conn, _ := pgx.Connect(context.Background(), os.Getenv("POSTGRES_CONN_STR"))
+
+	conn.Exec(context.Background(), "insert into issues (title, room, category, priority) values ($1, $2, $3, $4)", issue.Title, issue.Room, issue.Category, issue.Priority)
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"created": "issue",
+	})
+}
+
+func listIssuesHandler(w http.ResponseWriter, r *http.Request) {
+	var issue Issue
+	var issues = make([]Issue, 0)
+	conn, _ := pgx.Connect(context.Background(), os.Getenv("POSTGRES_CONN_STR"))
+
+	rows, err := conn.Query(context.Background(), "select id, title, room, category, priority from issues")
+	if err != nil {
+		json.NewEncoder(w).Encode(map[string]string{
+			"failed": "did not get rows",
+		})
+	}
+
+	fmt.Println("issues are as follows:")
+	for rows.Next() {
+		rows.Scan(&issue.ID, &issue.Title, &issue.Room, &issue.Category, &issue.Priority)
+		issues = append(issues, issue)
+	}
+
+	json.NewEncoder(w).Encode(issues)
+}
 func main() {
 	http.HandleFunc("/signup", CORSMiddleware(signupHandler))
 	http.HandleFunc("/login", CORSMiddleware(signinHandler))
 	http.HandleFunc("/signout", CORSMiddleware(signoutHandler))
 	http.HandleFunc("/protected", CORSMiddleware(authMiddeware(protectedHandler)))
-	http.ListenAndServe(":8080", nil)
+	http.HandleFunc("/issues/create", CORSMiddleware(authMiddeware(createIssueHandler)))
+	http.HandleFunc("/issues", CORSMiddleware(authMiddeware(listIssuesHandler)))
 
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
