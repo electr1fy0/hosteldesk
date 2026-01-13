@@ -11,13 +11,14 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var secret = []byte("supersecretkey")
 
 type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
 }
 
 func signinHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,11 +28,13 @@ func signinHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("failed to decode user data"))
 		return
 	}
-
-	conn, err := pgx.Connect(context.Background(), os.Getenv("POSTGRES_CONN_STR"))
-
 	var dbUser User
-	err = conn.QueryRow(context.Background(), "select id, name from users where id = $1", user.ID).Scan(&dbUser.ID, &dbUser.Name)
+	conn, err := pgx.Connect(context.Background(), os.Getenv("POSTGRES_CONN_STR"))
+	if err != nil {
+		http.Error(w, "failed to connect to db", http.StatusInternalServerError)
+		return
+	}
+	err = conn.QueryRow(context.Background(), "select name, password from users where name = $1", user.Name).Scan(&dbUser.Name, &dbUser.Password)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			http.Error(w, "invalid credentials", http.StatusUnauthorized)
@@ -39,11 +42,20 @@ func signinHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	err = bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(user.Password))
+	if err != nil {
+		http.Error(w, "invalid pass or user", http.StatusUnauthorized)
+		return
+	}
+
 	fmt.Println(dbUser)
 	claims := jwt.MapClaims{
-		"id":   user.ID,
-		"name": user.Name,
+		"sub":   user.Name,
+		"iat":   time.Now().Unix(),
+		"scope": []string{"read", "write"},
+		"exp":   time.Now().Add(48 * time.Hour).Unix(),
 	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenStr, err := token.SignedString(secret)
 	if err != nil {
@@ -121,8 +133,13 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 
 	if err != nil {
-		fmt.Println("error pasging")
+		fmt.Println("error parsing")
 		http.Error(w, "invalid body", http.StatusBadRequest)
+		return
+	}
+	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+	if err != nil {
+		http.Error(w, "failed to hash pass", http.StatusInternalServerError)
 		return
 	}
 
@@ -131,7 +148,7 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	_, err = conn.Exec(context.Background(), `insert into users (id, name) values ($1, $2)`, user.ID, user.Name)
+	_, err = conn.Exec(context.Background(), `insert into users (name, password) values ($1, $2)`, user.Name, hash)
 
 	if err != nil {
 		log.Println(err)
