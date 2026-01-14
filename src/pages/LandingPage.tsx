@@ -32,7 +32,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import data from "../data.json";
 import { CheckCircle, CircleDashed, CircleAlert } from "lucide-react";
 
 const HostelDesk = () => {
@@ -217,7 +216,7 @@ const HostelDesk = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {data.map((issue) => (
+                        {/*{data.map((issue) => (
                           <TableRow key={issue.id}>
                             <TableCell className="font-medium">
                               {issue.id}
@@ -229,7 +228,7 @@ const HostelDesk = () => {
                             <TableCell>{issue.priority}</TableCell>
                             <TableCell>{issue.assignee}</TableCell>
                           </TableRow>
-                        ))}
+                        ))}*/}
                       </TableBody>
                     </Table>
                   </div>

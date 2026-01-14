@@ -1,5 +1,9 @@
 package main
 
+// TODO:
+// Implement pagination
+// 1. Offset, Limit
+// 2. Cursor
 import (
 	"context"
 	"encoding/json"
@@ -103,6 +107,7 @@ func authMiddeware(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "invalid token", http.StatusUnauthorized)
 			return
 		}
+
 		claims, ok := token.Claims.(jwt.MapClaims)
 		fmt.Println(claims)
 		if !ok {
@@ -174,6 +179,7 @@ func signoutHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"removed": "cookie",
 	})
+
 }
 
 func createIssueHandler(w http.ResponseWriter, r *http.Request) {
@@ -191,9 +197,12 @@ func createIssueHandler(w http.ResponseWriter, r *http.Request) {
 func listIssuesHandler(w http.ResponseWriter, r *http.Request) {
 	var issue Issue
 	var issues = make([]Issue, 0)
+	params := r.URL.Query()
+	limit := params.Get("limit")
+	offset := params.Get("offset")
 	conn, _ := pgx.Connect(context.Background(), os.Getenv("POSTGRES_CONN_STR"))
 
-	rows, err := conn.Query(context.Background(), "select id, title, room, category, priority from issues")
+	rows, err := conn.Query(context.Background(), "select id, title, room, category, priority from issues limit $1 offset $2", limit, offset)
 	if err != nil {
 		json.NewEncoder(w).Encode(map[string]string{
 			"failed": "did not get rows",

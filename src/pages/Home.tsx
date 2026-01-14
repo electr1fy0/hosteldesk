@@ -16,7 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import data from "../data.json";
 
 import { CheckCircle, CircleAlert, CircleDashed } from "lucide-react";
 import { IconCirclePlusFilled } from "@tabler/icons-react";
@@ -44,6 +43,11 @@ interface Issue {
   assignee?: string;
 }
 
+interface Pagination {
+  limit: number;
+  offset: number;
+}
+
 export default function Home({ onLogout }: { onLogout: () => void }) {
   const [issue, setIssue] = useState<Issue>({
     title: "broken ac",
@@ -51,6 +55,7 @@ export default function Home({ onLogout }: { onLogout: () => void }) {
     category: "Electricity",
     priority: "Medium",
   });
+  const [page, setPage] = useState<Pagination>({ limit: 0, offset: 0 });
   const [issues, setIssues] = useState<Issue[]>([]);
 
   const updateIssue = (fields: Partial<Issue>) => {
@@ -58,19 +63,23 @@ export default function Home({ onLogout }: { onLogout: () => void }) {
       return { ...prev, ...fields };
     });
   };
-
-  useEffect(() => {
-    async function getIssues() {
-      const resp = await fetch("http://localhost:8080/issues", {
+  const params = new URLSearchParams({
+    limit: page.limit.toString(),
+    offset: page.offset.toString(),
+  });
+  async function getIssues() {
+    const resp = await fetch(
+      `http://localhost:8080/issues?${params.toString()}`,
+      {
         method: "GET",
-        // body: JSON.stringify(issue),
-        // headers: { "Content-Type": "application/json" },
         credentials: "include",
-      });
-      const data = await resp.json();
-      setIssues(data);
-      console.log(data);
-    }
+      },
+    );
+    const data = await resp.json();
+    setIssues(data);
+    console.log(data);
+  }
+  useEffect(() => {
     getIssues();
   }, []);
 
@@ -84,17 +93,6 @@ export default function Home({ onLogout }: { onLogout: () => void }) {
 
     console.log(await resp.json());
 
-    async function getIssues() {
-      const resp = await fetch("http://localhost:8080/issues", {
-        method: "GET",
-        // body: JSON.stringify(issue),
-        // headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-      const data = await resp.json();
-      setIssues(data);
-      console.log(data);
-    }
     getIssues();
   };
   return (
@@ -276,6 +274,16 @@ export default function Home({ onLogout }: { onLogout: () => void }) {
                     ))}
                 </TableBody>
               </Table>
+              <Button
+                onClick={() => {
+                  setPage((prev) => {
+                    return { offset: prev.offset, limit: prev.limit + 1 };
+                  });
+                  getIssues();
+                }}
+              >
+                Load More
+              </Button>
             </div>
           </div>
         </div>

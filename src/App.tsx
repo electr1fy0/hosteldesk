@@ -1,7 +1,6 @@
 import Home from "./pages/Home";
 import { useEffect, useState } from "react";
 import LandingPage from "./pages/LandingPage";
-import Auth from "./pages/Auth";
 
 type AuthState = "checking" | "authenticated" | "unauthenticated";
 
