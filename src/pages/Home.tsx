@@ -28,8 +28,7 @@ import { Label } from "@/components/ui/label";
 import { useIssues } from "../hooks/use-issues";
 
 export default function Home({ onLogout }: { onLogout: () => void }) {
-  const { issues, getIssues, submitComplaint, setPage, updateIssue } =
-    useIssues();
+  const { issues, submitComplaint, setPage, updateIssue } = useIssues();
   return (
     <SidebarProvider
       style={

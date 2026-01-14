@@ -17,6 +17,10 @@ export function useIssues() {
   };
 
   async function getIssues() {
+    const params = new URLSearchParams({
+      limit: page.limit.toString(),
+      offset: page.offset.toString(),
+    });
     const resp = await fetch(
       `http://localhost:8080/issues?${params.toString()}`,
       {
