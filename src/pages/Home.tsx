@@ -33,68 +33,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-interface Issue {
-  id?: string;
-  title: string;
-  room: string;
-  category: string;
-  priority: string;
-  status?: string;
-  assignee?: string;
-}
-
-interface Pagination {
-  limit: number;
-  offset: number;
-}
+import { useIssues } from "../hooks/use-issues";
 
 export default function Home({ onLogout }: { onLogout: () => void }) {
-  const [issue, setIssue] = useState<Issue>({
-    title: "broken ac",
-    room: "T918",
-    category: "Electricity",
-    priority: "Medium",
-  });
-  const [page, setPage] = useState<Pagination>({ limit: 0, offset: 0 });
-  const [issues, setIssues] = useState<Issue[]>([]);
-
-  const updateIssue = (fields: Partial<Issue>) => {
-    setIssue((prev) => {
-      return { ...prev, ...fields };
-    });
-  };
-  const params = new URLSearchParams({
-    limit: page.limit.toString(),
-    offset: page.offset.toString(),
-  });
-  async function getIssues() {
-    const resp = await fetch(
-      `http://localhost:8080/issues?${params.toString()}`,
-      {
-        method: "GET",
-        credentials: "include",
-      },
-    );
-    const data = await resp.json();
-    setIssues(data);
-    console.log(data);
-  }
-  useEffect(() => {
-    getIssues();
-  }, []);
-
-  const submitComplaint = async () => {
-    const resp = await fetch("http://localhost:8080/issues/create", {
-      method: "POST",
-      body: JSON.stringify(issue),
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-    });
-
-    console.log(await resp.json());
-
-    getIssues();
-  };
+  const { issues, getIssues, submitComplaint, setPage, updateIssue } =
+    useIssues();
   return (
     <SidebarProvider
       style={
