@@ -93,15 +93,15 @@ export function Auth() {
             <Field orientation="vertical">
               <Button
                 variant="default"
-                type="button"
+                type="submit"
                 onClick={(e) => {
                   e.preventDefault();
                   handleLogin();
                 }}
               >
-                Login
+                Sign In
               </Button>
-              <Button type="submit" variant="outline">
+              <Button type="button" variant="outline">
                 Signup
               </Button>
             </Field>

@@ -20,7 +20,6 @@ import {
 import { CheckCircle, CircleAlert, CircleDashed } from "lucide-react";
 import { IconCirclePlusFilled } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogClose,
