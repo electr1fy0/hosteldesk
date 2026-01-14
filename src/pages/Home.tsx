@@ -8,15 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
+import IssueTable from "@/components/issue-table";
 import { CheckCircle, CircleAlert, CircleDashed } from "lucide-react";
 import { IconCirclePlusFilled } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
@@ -186,42 +179,12 @@ export default function Home({ onLogout }: { onLogout: () => void }) {
                   New Complaint
                 </Button>*/}
               </div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">ID</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Room</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Priority</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Assignee</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {issues.length > 0 &&
-                    issues[0].id &&
-                    issues.map((issue) => (
-                      <TableRow key={issue.id}>
-                        <TableCell className="font-medium">
-                          {issue.title}
-                        </TableCell>
-                        <TableCell>{issue.title}</TableCell>
-                        <TableCell>{issue.room}</TableCell>
-                        <TableCell>{issue.category}</TableCell>
-                        <TableCell>{issue.priority}</TableCell>
-                        {/*<TableCell>{issue.status}</TableCell>*/}
-                        {/*<TableCell>{issue.assignee}</TableCell>*/}
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+              <IssueTable issues={issues} />
               <Button
                 onClick={() => {
                   setPage((prev) => {
                     return { offset: prev.offset, limit: prev.limit + 1 };
                   });
-                  getIssues();
                 }}
               >
                 Load More

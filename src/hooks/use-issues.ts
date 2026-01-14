@@ -16,11 +16,6 @@ export function useIssues() {
     });
   };
 
-  const params = new URLSearchParams({
-    limit: page.limit.toString(),
-    offset: page.offset.toString(),
-  });
-
   async function getIssues() {
     const resp = await fetch(
       `http://localhost:8080/issues?${params.toString()}`,
@@ -33,6 +28,26 @@ export function useIssues() {
     setIssues(data);
     console.log(data);
   }
+  useEffect(() => {
+    async function getIssues() {
+      const params = new URLSearchParams({
+        limit: page.limit.toString(),
+        offset: page.offset.toString(),
+      });
+      const resp = await fetch(
+        `http://localhost:8080/issues?${params.toString()}`,
+        {
+          method: "GET",
+          credentials: "include",
+        },
+      );
+      const data = await resp.json();
+      setIssues(data);
+      console.log(data);
+    }
+
+    getIssues();
+  }, [page]);
 
   const submitComplaint = async () => {
     await fetch("http://localhost:8080/issues/create", {
@@ -50,6 +65,7 @@ export function useIssues() {
 
   return {
     issues,
+    setIssues,
     getIssues,
     submitComplaint,
     setPage,
