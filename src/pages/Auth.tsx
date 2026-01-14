@@ -7,55 +7,11 @@ import {
   FieldLegend,
   FieldSet,
 } from "@/components/ui/field";
-import { useNavigate } from "react-router";
-
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-
-type User = {
-  name: string;
-  password: string;
-};
+import { useAuth } from "@/hooks/use-auth";
 
 export function Auth() {
-  const navigate = useNavigate();
-  const [user, setUser] = useState<User>({ name: "", password: "" });
-  function updateUser(fields: Partial<User>) {
-    setUser((prev) => {
-      if (!prev) return prev;
-      return { ...prev, ...fields };
-    });
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    console.log(user);
-    const resp = await fetch("http://localhost:8080/signup", {
-      method: "POST",
-      credentials: "include",
-      body: JSON.stringify(user),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await resp.json();
-    console.log(data);
-  }
-
-  async function handleLogin() {
-    const resp = await fetch("http://localhost:8080/login", {
-      method: "POST",
-      credentials: "include",
-      body: JSON.stringify(user),
-      headers: { "Content-Type": "application/json" },
-    });
-    const data = await resp.json();
-    console.log(data);
-    if (resp.ok) {
-      navigate("/", { replace: true });
-    }
-  }
-
+  const { handleLogin, handleSubmit, updateUser } = useAuth();
   return (
     <div className="flex flex-col justify-start items-center min-h-svh min-w-svh">
       <div className="w-full max-w-md max-h-md mt-32">

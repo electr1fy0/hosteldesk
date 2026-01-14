@@ -12,3 +12,8 @@ export interface Pagination {
   limit: number;
   offset: number;
 }
+
+export type User = {
+  name: string;
+  password: string;
+};
